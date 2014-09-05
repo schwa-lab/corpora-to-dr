@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cpeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+  <collectionReader>
+    <collectionIterator>
+      <descriptor>
+        <import location="DBCollectionReaderDescriptor.xml"/>
+      </descriptor>
+    </collectionIterator>
+  </collectionReader>
+  <casProcessors casPoolSize="16" processingUnitThreadCount="16">
+    <casProcessor deployment="integrated" name="DB loader and CAS consumer">
+      <descriptor>
+        <import location="ToDocrepCASConsumerDescriptor.xml"/>
+      </descriptor>
+      <deploymentParameters/>
+      <filter></filter>
+      <errorHandling>
+        <errorRateThreshold action="terminate" value="1/1000"/>
+        <maxConsecutiveRestarts action="terminate" value="0"/>
+        <timeout max="10000"/>
+      </errorHandling>
+      <checkpoint batch="10000"/>
+    </casProcessor>
+  </casProcessors>
+  <cpeConfig>
+    <numToProcess>-1</numToProcess>
+    <deployAs>immediate</deployAs>
+    <checkpoint file="" time="300000"/>
+    <timerImpl></timerImpl>
+  </cpeConfig>
+</cpeDescription>

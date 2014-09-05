@@ -1,0 +1,10 @@
+DEPS=$(shell cd $(shell pwd)/../../dr-benchmark/deps/prefix && pwd)
+
+PKG_CONFIG_PATH=$(DEPS)/lib/pkgconfig/
+UIMACPP_HOME=$(DEPS)
+
+MYSQL_CFLAGS = $(shell mysql_config --cflags)
+MYSQL_LIBS = $(shell mysql_config --libs_r)
+
+BASE_CXXFLAGS = -std=gnu++11 -W -Wall -Wextra -pedantic -O4 -g $(MYSQL_CFLAGS)
+BASE_LDFLAGS = $(MYSQL_LIBS) -lschwa

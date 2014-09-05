@@ -1,0 +1,1 @@
+The Python converters are written in Python 2, not Python 3. They expect an environment where libschwa-python and MySQLdb are installed.
