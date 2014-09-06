@@ -12,13 +12,6 @@ INPUT_DIR = '/n/schwafs/home/schwa/data/raw'
 OUTPUT_DIR = '/n/schwafs/home/schwa/data/processed'
 
 FILES = (
-    # The Spanish data does not contain document boundaries :(
-    # ('CONLL2002/ner/data/esp.train.gz', 'CONLL2002/esp.train.dr', 'es', 'windows-1251', 'iob2'),
-    # ('CONLL2002/ner/data/esp.testa.gz', 'CONLL2002/esp.testa.dr', 'es', 'windows-1251', 'iob2'),
-    # ('CONLL2002/ner/data/esp.testb.gz', 'CONLL2002/esp.testb.dr', 'es', 'windows-1251', 'iob2'),
-    ('CONLL2002/ner/data/ned.train.gz', 'CONLL2002/ned.train.dr', 'nl', 'latin1', 'iob2'),
-    ('CONLL2002/ner/data/ned.testa.gz', 'CONLL2002/ned.testa.dr', 'nl', 'latin1', 'iob2'),
-    ('CONLL2002/ner/data/ned.testb.gz', 'CONLL2002/ned.testb.dr', 'nl', 'latin1', 'iob2'),
     ('CONLL2003/ner/eng.train', 'CONLL2003/eng.train.dr', 'en', 'ascii', 'iob1'),
     ('CONLL2003/ner/eng.testa', 'CONLL2003/eng.testa.dr', 'en', 'ascii', 'iob1'),
     ('CONLL2003/ner/eng.testb', 'CONLL2003/eng.testb.dr', 'en', 'ascii', 'iob1'),
