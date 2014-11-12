@@ -39,7 +39,7 @@ for d in $(find ${NANC_DIR} -maxdepth 1 -mindepth 1 -type d | sort); do
   find ${NANC_DIR}/${d} -type f -name '*.gz' \
     | grep -v '/ws[0-9]*\.gz$' \
     | parallel "zcat {} \
-      | corpora-to-dr --corpus=nanc 2> ${OUTPUT_DIR}/NANC/${d}/{/.}.log \
+      | corpora-to-dr --corpus nanc 2> ${OUTPUT_DIR}/NANC/${d}/{/.}.log \
       | gzip -9 > ${OUTPUT_DIR}/NANC/${d}/{/.}.dr.gz"
 
   # Pre-process the WSJ articles before attempting to convert them as their content isn't SGML
@@ -49,6 +49,6 @@ for d in $(find ${NANC_DIR} -maxdepth 1 -mindepth 1 -type d | sort); do
     | grep '/ws[0-9]*\.gz$' \
     | parallel "zcat {} \
       | sed 's/&/\\&amp;/g; s/<----/\\&lt;----/g; s/<</\\&lt;\\&lt;/g; s/<0\\.05/\\&lt;0.05/g; s/<\$/\\&lt;/; s/>>/\\&gt;\\&gt;/g; s/Delaware>/Delaware\\&gt;/g; s/CATEGORY>/CATEGORY\\&gt;/g;' \
-      | corpora-to-dr --corpus=nanc 2> ${OUTPUT_DIR}/NANC/${d}/{/.}.log \
+      | corpora-to-dr --corpus nanc 2> ${OUTPUT_DIR}/NANC/${d}/{/.}.log \
       | gzip -9 > ${OUTPUT_DIR}/NANC/${d}/{/.}.dr.gz"
 done
