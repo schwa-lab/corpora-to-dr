@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 import gzip
 import io
 import os
+import re
 
 from schwa import dr
 
@@ -20,6 +21,8 @@ FILES = (
     ('CONLL2003/ner/deu.testa', 'CONLL2003/deu.testa.dr', 'de', 'latin1'),
     ('CONLL2003/ner/deu.testb', 'CONLL2003/deu.testb.dr', 'de', 'latin1'),
 )
+
+RE_DATE = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
 
 
 class Token(dr.Ann):
@@ -43,6 +46,23 @@ class Sentence(dr.Ann):
   span = dr.Slice(Token)
 
 
+class Heading(dr.Ann):
+  sentence = dr.Pointer(Sentence)
+  level = dr.Field()  # unsigned int
+  is_heading = dr.Field()
+  is_dateline = dr.Field()
+  is_author = dr.Field()
+
+
+class Paragraph(dr.Ann):
+  span = dr.Slice(Sentence)
+
+
+class Block(dr.Ann):
+  heading = dr.Pointer(Heading)
+  paragraph = dr.Pointer(Paragraph)
+
+
 class Doc(dr.Doc):
   doc_id = dr.Text()
   lang = dr.Text()
@@ -51,6 +71,9 @@ class Doc(dr.Doc):
   chunks = dr.Store(Chunk)
   named_entities = dr.Store(NamedEntity)
   sentences = dr.Store(Sentence)
+  headings = dr.Store(Heading)
+  paragraphs = dr.Store(Paragraph)
+  blocks = dr.Store(Block)
 
 
 def process(in_file, encoding):
@@ -168,6 +191,41 @@ def encode_iob1(doc, encoded_label_attr, span_store_attr, span_label_attr):
     setattr(token, encoded_label_attr, encoding)
 
 
+def create_blocks(doc):
+  # Find any all-caps sentences within the first three sentences in the document.
+  if len(doc.sentences) > 2:
+    s = 2
+    if not RE_DATE.match(doc.tokens[doc.sentences[s].span.stop - 1].raw):
+      s -= 1
+    if RE_DATE.match(doc.tokens[doc.sentences[s].span.stop - 1].raw):
+      if s == 2:
+        heading = doc.headings.create(sentence=doc.sentences[0], is_heading=True, level=1)
+        doc.blocks.create(heading=heading)
+        line = ' '.join(t.raw for t in doc.tokens[doc.sentences[1].span])
+        if ',' in line or line.startswith('[ CORRECTED '):
+          heading = doc.headings.create(sentence=doc.sentences[1], is_dateline=True)
+        elif not line[0].isupper():
+          heading = doc.headings.create(sentence=doc.sentences[1], is_heading=True, level=1)
+        else:
+          heading = doc.headings.create(sentence=doc.sentences[1], is_author=True)
+        doc.blocks.create(heading=heading)
+        heading = doc.headings.create(sentence=doc.sentences[2], is_dateline=True)
+        doc.blocks.create(heading=heading)
+      else:
+        heading = doc.headings.create(sentence=doc.sentences[0], is_heading=True, level=1)
+        doc.blocks.create(heading=heading)
+        heading = doc.headings.create(sentence=doc.sentences[1], is_dateline=True)
+        doc.blocks.create(heading=heading)
+    else:
+      s = -1
+  else:
+    s = -1
+
+  # We don't have paragraph boundary information, so shove all of the rest of the sentences into one giant faux paragraph.
+  paragraph = doc.paragraphs.create(span=slice(s + 1, len(doc.sentences)))
+  doc.blocks.create(paragraph=paragraph)
+
+
 def convert_to_docrep(fake_docs, in_file, out_file, lang):
   print('Processing {}'.format(in_file))
   with open(os.path.join(OUTPUT_DIR, out_file), 'wb') as f:
@@ -190,6 +248,7 @@ def convert_to_docrep(fake_docs, in_file, out_file, lang):
         decode_iob1(doc, sentence, fake_sentence, 3, 'label', 'chunks')
         decode_iob1(doc, sentence, fake_sentence, 4, 'label', 'named_entities')
 
+      create_blocks(doc)
       writer.write(doc)
 
 
